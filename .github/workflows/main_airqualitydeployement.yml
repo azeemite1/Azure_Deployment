@@ -27,7 +27,10 @@ jobs:
           python -m venv venv
           source venv/bin/activate
       
-      - name: Install dependencies
+      - name: Install NumPy separately
+        run: pip install -r numpy-requirements.txt
+        
+      - name: Install other dependencies
         run: pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
@@ -61,7 +64,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -75,4 +77,3 @@ jobs:
         with:
           app-name: 'airqualitydeployement'
           slot-name: 'Production'
-          
