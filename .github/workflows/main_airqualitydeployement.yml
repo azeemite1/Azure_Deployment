@@ -27,24 +27,22 @@ jobs:
           python -m venv venv
           source venv/bin/activate
       
-      - name: Install NumPy separately
-        run: pip install -r numpy-requirements.txt
-        
-      - name: Install other dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          source venv/bin/activate
+          pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: |
+          zip -r release.zip ./* -x "*.git*" "venv/*"
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v3
         with:
           name: python-app
-          path: |
-            release.zip
-            !venv/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -77,3 +75,7 @@ jobs:
         with:
           app-name: 'airqualitydeployement'
           slot-name: 'Production'
+
+      - name: Set startup command for Azure
+        run: |
+          az webapp config set --name airqualitydeployement --resource-group myResourceGroup --startup-file 'gunicorn -w 4 -b 0.0.0.0:8000 app:app'
